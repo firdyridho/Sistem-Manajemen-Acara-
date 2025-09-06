@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistem Manajemen Acara</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Splash Screen -->
+    <div id="splashScreen">
+      <div class="splash-content">
+        <h1>Event Management System</h1>
+        <h2>Tugas Mata Kuliah Algoritma dan Pemrograman</h2>
+
+        <div class="team-members">
+          <h3>Kelompok 3 - Kelas D</h3>
+          <ul>
+            <li>Firdy Ridho Fillah</li>
+            <li>Akbar Ardiani Setiawan</li>
+
+            <div class="progress-bar">
+              <div class="progress" id="splashProgress"></div>
+            </div>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <button class="toggle-sidebar" onclick="toggleSidebar()">
+        <i class="fas fa-chevron-left" id="sidebarIcon"></i>
+      </button>
+
+      <div class="sidebar-header">
+        <h2>Event Manager</h2>
+        <p>Kelola acara Anda</p>
+      </div>
+
+      <div class="sidebar-menu">
+        <div class="menu-item active" onclick="showTab('dashboard')">
+          <i class="fas fa-chart-line"></i>
+          <span>Dashboard</span>
+        </div>
+        <div class="menu-item" onclick="showTab('create')">
+          <i class="fas fa-plus-circle"></i>
+          <span>Buat Acara</span>
+        </div>
+        <div class="menu-item" onclick="showTab('events')">
+          <i class="fas fa-list"></i>
+          <span>Daftar Acara</span>
+        </div>
+        <div class="menu-item" onclick="showTab('manage')">
+          <i class="fas fa-cog"></i>
+          <span>Kelola Acara</span>
+        </div>
+        <div class="menu-item" onclick="showTab('backup')">
+          <i class="fas fa-database"></i>
+          <span>Backup</span>
+        </div>
+        <div class="menu-item" onclick="showTab('about')">
+          <i class="fas fa-users"></i>
+          <span>Tentang Kami</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+      <div class="header">
+        <h1>Sistem Manajemen Acara</h1>
+        <button class="menu-toggle" onclick="toggleMobileSidebar()">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+
+      <div class="container">
+        <!-- Dashboard Tab -->
+        <div id="dashboardTab" class="tab-content active">
+          <h2><i class="fas fa-chart-line"></i> Dashboard</h2>
+
+          <div class="dashboard-cards">
+            <div class="dashboard-card upcoming">
+              <div class="icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <h3 id="upcomingCount">0</h3>
+              <p>Acara Mendatang</p>
+            </div>
+
+            <div class="dashboard-card ongoing">
+              <div class="icon">
+                <i class="fas fa-play-circle"></i>
+              </div>
+              <h3 id="ongoingCount">0</h3>
+              <p>Sedang Berlangsung</p>
+            </div>
+
+            <div class="dashboard-card completed">
+              <div class="icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <h3 id="completedCount">0</h3>
+              <p>Acara Selesai</p>
+            </div>
+          </div>
+
+          <h3><i class="fas fa-calendar-day"></i> Acara Mendatang</h3>
+          <div id="upcomingEvents" class="events-grid">
+            <div class="loading">
+              <p><i class="fas fa-spinner fa-spin"></i> Memuat data...</p>
+            </div>
+          </div>
+
+          <h3 style="margin-top: 30px">
+            <i class="fas fa-history"></i> Acara Terbaru
+          </h3>
+          <div id="recentEvents" class="events-grid">
+            <div class="loading">
+              <p><i class="fas fa-spinner fa-spin"></i> Memuat data...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Pembuatan Acara  -->
+        <div id="createTab" class="tab-content">
+          <h2><i class="fas fa-plus"></i> Buat Acara Baru</h2>
+          <form id="createEventForm">
+            <div class="form-group">
+              <label for="title">Judul Acara</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                required
+                placeholder="Nama acara"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="description">Deskripsi Acara</label>
+              <textarea
+                id="description"
+                name="description"
+                rows="4"
+                placeholder="Deskripsi lengkap acara"
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="date_time">Waktu Acara</label>
+              <input
+                type="datetime-local"
+                id="date_time"
+                name="date_time"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="location">Lokasi Acara</label>
+              <input
+                type="text"
+                id="location"
+                name="location"
+                required
+                placeholder="Tempat acara"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="capacity">Kapasitas Peserta (opsional)</label>
+              <input
+                type="number"
+                id="capacity"
+                name="capacity"
+                min="1"
+                placeholder="Jumlah peserta maksimum"
+              />
+            </div>
+
+            <button type="submit">Buat Acara</button>
+          </form>
+        </div>
+
+        <!-- Events Tab -->
+        <div id="eventsTab" class="tab-content">
+          <h2><i class="fas fa-calendar-day"></i> Daftar Acara Tersedia</h2>
+          <div id="eventsContainer" class="loading">
+            <p><i class="fas fa-spinner fa-spin"></i> Memuat data...</p>
+          </div>
+        </div>
+
+        <!-- Manage Tab -->
+        <div id="manageTab" class="tab-content">
+          <h2><i class="fas fa-cog"></i> Kelola Acara dan Pendaftaran</h2>
+
+          <div id="statsContainer" class="stats">
+            <div class="stat-card">
+              <h3><i class="fas fa-spinner fa-spin"></i></h3>
+              <p>Total Acara</p>
+            </div>
+            <div class="stat-card">
+              <h3><i class="fas fa-spinner fa-spin"></i></h3>
+              <p>Total Pendaftar</p>
+            </div>
+            <div class="stat-card">
+              <h3><i class="fas fa-spinner fa-spin"></i></h3>
+              <p>Acara Mendatang</p>
+            </div>
+          </div>
+
+          <h3><i class="fas fa-users"></i> Daftar Pendaftar</h3>
+          <table class="registrations-table">
+            <thead>
+              <tr>
+                <th>Nama</th>
+                <th>Acara</th>
+                <th>Email</th>
+                <th>Telepon</th>
+                <th>Tanggal Daftar</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="registrationsBody">
+              <tr>
+                <td colspan="6" style="text-align: center">
+                  <i class="fas fa-spinner fa-spin"></i> Memuat data...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Backup Tab -->
+        <div id="backupTab" class="tab-content">
+          <h2><i class="fas fa-database"></i> Backup dan Restore Data</h2>
+
+          <div class="backup-section">
+            <h3><i class="fas fa-download"></i> Backup Data</h3>
+            <p>Simpan database ke file untuk backup:</p>
+            <button onclick="backupDatabase()">
+              <i class="fas fa-save"></i> Backup Database
+            </button>
+
+            <h3 style="margin-top: 30px">
+              <i class="fas fa-upload"></i> Restore Data
+            </h3>
+            <p>Upload file database sebelumnya:</p>
+            <div class="form-group">
+              <label for="databaseFile">Pilih File Database</label>
+              <input type="file" id="databaseFile" accept=".sqlite,.db" />
+            </div>
+            <button onclick="restoreDatabase()">
+              <i class="fas fa-upload"></i> Restore Database
+            </button>
+
+            <h3 style="margin-top: 30px">
+              <i class="fas fa-trash"></i> Hapus Semua Data
+            </h3>
+            <p>Hapus semua data dan mulai dari awal:</p>
+            <button onclick="resetDatabase()" class="btn-danger">
+              <i class="fas fa-trash"></i> Hapus Semua Data
+            </button>
+          </div>
+        </div>
+
+        <!-- Tentang Kami -->
+        <div id="aboutTab" class="tab-content">
+          <h2><i class="fas fa-users"></i> Tentang Kami</h2>
+          <div class="about-section">
+            <div class="stat-card">
+              <h3>Kelompok 3</h3>
+              <p>Kelas D</p>
+              <p>Mata Kuliah Algoritma dan Pemrograman</p>
+            </div>
+
+            <h3 style="margin-top: 30px">Anggota Kelompok</h3>
+            <div class="events-grid">
+              <div class="event-card">
+                <div class="event-header">
+                  <h3>Firdy Ridho Fillah</h3>
+                </div>
+                <div class="event-body">
+                  <p><strong>NIM:</strong> 3337250018</p>
+                  <p><strong>Role:</strong> Back-end Developer</p>
+                  <p><strong>Kontribusi:</strong> Database Managemsent</p>
+                </div>
+              </div>
+
+              <div class="event-card">
+                <div class="event-header">
+                  <h3>Akbar Aridani Setiawan</h3>
+                </div>
+                <div class="event-body">
+                  <p><strong>NIM:</strong> 1234567891</p>
+                  <p><strong>Role:</strong> Front-end Developer</p>
+                  <p><strong>Kontribusi:</strong> UI/UX Design</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Pendaftaran -->
+    <div id="registrationModal" class="modal">
+      <div class="modal-content">
+        <h2>
+          <i class="fas fa-user-plus"></i> Daftar untuk
+          <span id="eventTitle"></span>
+        </h2>
+        <form id="registrationForm">
+          <input type="hidden" id="eventId" name="event_id" />
+
+          <div class="form-group">
+            <label for="full_name"
+              ><i class="fas fa-user"></i> Nama Lengkap</label
+            >
+            <input
+              type="text"
+              id="full_name"
+              name="full_name"
+              required
+              placeholder="Nama lengkap"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email"
+              ><i class="fas fa-envelope"></i> Alamat Email</label
+            >
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              placeholder="email@gmail.com"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="phone"
+              ><i class="fas fa-phone"></i> Nomor Telepon</label
+            >
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              placeholder="08123456789"
+            />
+          </div>
+
+          <button type="submit">
+            <i class="fas fa-check"></i> Daftar Sekarang
+          </button>
+          <button
+            type="button"
+            onclick="closeModal()"
+            style="background: var(--gray)"
+          >
+            <i class="fas fa-times"></i> Batal
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Detail Acara -->
+    <div id="eventDetailModal" class="modal">
+      <div class="modal-content">
+        <h2><i class="fas fa-info-circle"></i> Detail Acara</h2>
+        <div id="eventDetailContent">
+          <!-- Event details will be generated here -->
+        </div>
+        <div style="margin-top: 20px; text-align: center">
+          <button onclick="closeModal()">
+            <i class="fas fa-times"></i> Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div id="confirmDeleteModal" class="modal">
+      <div class="modal-content">
+        <h2><i class="fas fa-exclamation-triangle"></i> Konfirmasi Hapus</h2>
+        <p>
+          Anda yakin ingin menghapus acara ini? Tindakan ini tidak dapat
+          dibatalkan.
+        </p>
+        <div
+          style="
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+          "
+        >
+          <button onclick="confirmDelete()" class="btn-danger">
+            <i class="fas fa-trash"></i> Hapus
+          </button>
+          <button onclick="closeModal()" style="background: var(--gray)">
+            <i class="fas fa-times"></i> Batal
+          </button>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
